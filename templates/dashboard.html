@@ -244,7 +244,11 @@ Dashboard – {{ project.name }}
                   <form method="post" action="{{ url_for('upload_photos', pid=project._id) }}" enctype="multipart/form-data" class="d-flex flex-column gap-2">
                     <input type="hidden" name="task_idx" value="{{ phase }}">
                     <input type="file" name="photos" accept="image/*" class="form-control form-control-sm" required {% if photos %}disabled{% endif %}>
-                    <button type="submit" class="btn btn-sm btn-primary mt-1" {% if photos %}disabled{% endif %}>Upload</button>
+                    <button type="submit"
+                            class="btn btn-sm {% if photos %}btn-danger{% else %}btn-primary{% endif %} mt-1"
+                            {% if photos %}disabled{% endif %}>
+                        Upload
+                    </button>
                   </form>
                 </td>
                 {% endif %}
@@ -306,7 +310,11 @@ Dashboard – {{ project.name }}
             <form method="post" action="{{ url_for('upload_photos', pid=project._id) }}" enctype="multipart/form-data" class="d-flex flex-column gap-2 w-100 px-2">
               <input type="hidden" name="task_idx" value="{{ phase }}">
               <input type="file" name="photos" accept="image/*" class="form-control form-control-sm" required {% if photos %}disabled{% endif %}>
-              <button type="submit" class="btn btn-sm btn-primary mt-1 w-100" {% if photos %}disabled{% endif %}>Upload</button>
+              <button type="submit"
+                            class="btn btn-sm {% if photos %}btn-danger{% else %}btn-primary{% endif %} mt-1"
+                            {% if photos %}disabled{% endif %}>
+                        Upload
+              </button>
             </form>
 
           </div>
