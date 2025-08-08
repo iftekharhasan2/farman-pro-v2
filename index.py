@@ -2,7 +2,7 @@ import os
 import bcrypt
 import logging
 import datetime
-from datetime import date
+from datetime import date , timedelta
 from bson import ObjectId, errors as bson_errors
 from werkzeug.utils import secure_filename
 from flask import Flask, request, session, redirect, url_for, render_template, flash
@@ -281,24 +281,32 @@ def dashboard(pid):
         proj = proj_col.find_one({"_id": proj["_id"]})  # Refresh after update
 
     # --- Daily task_done & task_photo reset logic ---
-    # Store last_reset_date in project doc to track when last reset happened
     last_reset_date = proj.get("task_done_reset_date")
 
     if last_reset_date != today:
-        # Reset for new day: clear today's entries and update reset date
+        task_done = proj.get("task_done", {})
+        task_photo = proj.get("task_photo", {})
+
         proj_col.update_one(
             {"_id": proj["_id"]},
             {
+                "$push": {
+                    "task_history": {
+                        "date": last_reset_date,
+                        "task_done": proj["task_done"],
+                        "task_photo": proj["task_photo"] 
+                    }
+                },
                 "$set": {
+                    "task_done_reset_date": today,
                     "task_done": {today: {}},
-                    "task_photo": {today: {}},
-                    "task_done_reset_date": today
+                    "task_photo": {today: {}}
                 }
             }
         )
-        proj = proj_col.find_one({"_id": proj["_id"]})  # Refresh after reset
+        proj = proj_col.find_one({"_id": proj["_id"]})
 
-    # Ensure keys exist in case no reset triggered (show today's data)
+    # Ensure today's keys exist
     task_done = proj.get("task_done", {})
     task_photo = proj.get("task_photo", {})
     if today not in task_done:
