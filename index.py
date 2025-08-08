@@ -396,9 +396,9 @@ def upload_photos(pid):
 
         # Mark task as done if any photo uploaded
         if saved:
-            task_done = proj.get("task_done", {})
+            task_done = proj.get("task_done_full", {})
             task_done[task_idx] = True
-            proj_col.update_one({"_id": proj["_id"]}, {"$set": {"task_done": task_done}})
+            proj_col.update_one({"_id": proj["_id"]}, {"$set": {"task_done_full": task_done}})
 
         flash(f"Uploaded {len(saved)} photo(s)! Task marked as done.", "success")
     return redirect(url_for("dashboard", pid=pid))
@@ -562,6 +562,53 @@ def admin_delete_project(pid):
         flash("Project not found or already deleted", "warning")
     return redirect(url_for('admin_dashboard'))
 
+
+
+@app.route("/projects/<pid>/task_done", methods=["POST"])
+def mark_task_done(pid):
+    if "user_id" not in session:
+        flash("Unauthorized access. Please log in.", "danger")
+        return redirect(url_for("login"))
+
+    try:
+        proj_id = ObjectId(pid)
+    except Exception:
+        flash("Invalid project ID.", "danger")
+        return redirect(url_for("projects"))
+
+    phase = request.form.get("phase")
+    task_desc = request.form.get("task_desc")
+
+    if not phase or not task_desc:
+        flash("Invalid task data.", "danger")
+        return redirect(url_for("dashboard", pid=pid))
+
+    # Find the project owned by the logged-in user
+    proj = proj_col.find_one({"_id": proj_id, "owner": session["user_id"]})
+    if not proj:
+        flash("Project not found or you do not have permission.", "danger")
+        return redirect(url_for("projects"))
+
+    # Get existing task_done dict or empty
+    task_done = proj.get("task_done", {})
+
+    # Get list of done tasks for the phase or create new list
+    done_list = task_done.get(phase, [])
+
+    if task_desc not in done_list:
+        done_list.append(task_desc)
+
+    # Update the phase tasks in the dict
+    task_done[phase] = done_list
+
+    # Update in MongoDB
+    proj_col.update_one(
+        {"_id": proj_id},
+        {"$set": {"task_done": task_done}}
+    )
+
+    flash(f"Marked task '{task_desc}' as done.", "success")
+    return redirect(url_for("dashboard", pid=pid))
 
 @app.route("/time-left")
 def time_left():
