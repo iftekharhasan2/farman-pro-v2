@@ -248,9 +248,11 @@ Dashboard – {{ project.name }}
                       <form method="post" action="{{ url_for('mark_task_done', pid=project._id) }}">
                         <input type="hidden" name="phase" value="{{ phase }}">
                         <input type="hidden" name="task_desc" value="{{ t.description }}">
-                        <button type="submit" class="btn btn-sm {% if t.description in done_tasks %}btn-success{% else %}btn-outline-success{% endif %}">
-                          {% if t.description in done_tasks %}Done{% else %}Mark Done{% endif %}
-                        </button>
+                          <button type="submit"
+                                  class="btn btn-sm {% if t.description in done_tasks %}btn-success disabled{% else %}btn-outline-success{% endif %}"
+                                  {% if t.description in done_tasks %}disabled style="pointer-events: none;"{% endif %}>
+                            {% if t.description in done_tasks %}Done{% else %}Mark Done{% endif %}
+                          </button>
                       </form>
                     </td>
                   </tr>
@@ -315,9 +317,11 @@ Dashboard – {{ project.name }}
                     <form method="post" action="{{ url_for('mark_task_done', pid=project._id) }}">
                       <input type="hidden" name="phase" value="{{ phase }}">
                       <input type="hidden" name="task_desc" value="{{ t.description }}">
-                      <button type="submit" class="btn btn-sm {% if t.description in done_tasks %}btn-success{% else %}btn-outline-success{% endif %} w-100">
-                        {% if t.description in done_tasks %}Done{% else %}Mark Done{% endif %}
-                      </button>
+                        <button type="submit"
+                                class="btn btn-sm {% if t.description in done_tasks %}btn-success disabled{% else %}btn-outline-success{% endif %}"
+                                {% if t.description in done_tasks %}disabled style="pointer-events: none;"{% endif %}>
+                          {% if t.description in done_tasks %}Done{% else %}Mark Done{% endif %}
+                        </button>
                     </form>
                   </div>
                 {% endfor %}
